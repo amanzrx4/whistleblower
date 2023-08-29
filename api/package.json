@@ -1,0 +1,23 @@
+{
+  "name": "whistleblower",
+  "version": "1.0.0",
+  "description": "whistleblower backend",
+  "main": "lib/index",
+  "scripts": {
+    "build-server": "tsc && npx prisma db push",
+    "build": "tsc",
+    "start": "node lib/index.js",
+    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\""
+  },
+  "author": "aman",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/node": "^20.5.7",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
