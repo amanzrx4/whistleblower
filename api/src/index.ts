@@ -29,6 +29,7 @@ app.get("/", (req, res) => {
 
 app.get("/whistleblow", async (req: Request, res: Response) => {
   try {
+    console.log("primsa", prisma);
     const query = await prisma.submissions.findMany();
 
     const filteredQuery = query.filter(
