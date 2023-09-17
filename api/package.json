@@ -4,7 +4,7 @@
   "description": "whistleblower backend",
   "main": "lib/index",
   "scripts": {
-    "build-server": "tsc npx prisma db push",
+    "build-server": "tsc && npx prisma db push",
     "build": "tsc",
     "start": "node lib/index.js",
     "dev": "concurrently \"npx tsc --watch\" \"node --watch lib/index.js\""
