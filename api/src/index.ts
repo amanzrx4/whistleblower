@@ -29,7 +29,6 @@ app.get("/", (req, res) => {
 
 app.get("/whistleblow", async (req: Request, res: Response) => {
   try {
-    console.log("primsa", prisma);
     const query = await prisma.submissions.findMany();
 
     const filteredQuery = query.filter(
@@ -41,6 +40,7 @@ app.get("/whistleblow", async (req: Request, res: Response) => {
       message: "success",
     });
   } catch (error) {
+    console.log("error", error);
     res.status(500).send({
       message: "Something went wrong",
     });
