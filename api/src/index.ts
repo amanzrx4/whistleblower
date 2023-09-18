@@ -13,6 +13,7 @@ app.use(express.json());
 app.use(cors());
 
 const RECLAIM_APP_URL = "https://share.reclaimprotocol.org";
+const SERVER_URL = "https://whistleblower-backend-qq9t.onrender.com"
 
 enum SubmissionStatus {
   pending = "pending",
@@ -66,7 +67,7 @@ app.post("/generate", async (req: Request, res: Response) => {
     encodeURIComponent(
       JSON.stringify({
         sessionId,
-        callbackUrl: "http://192.168.0.182:8000/data/" + sessionId,
+        callbackUrl: SERVER_URL + "/data/" + sessionId,
       })
     );
 

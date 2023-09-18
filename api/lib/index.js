@@ -25,6 +25,7 @@ const DATABASE_URL = process.env.DATABASE_URL;
 app.use(express_1.default.json());
 app.use((0, cors_1.default)());
 const RECLAIM_APP_URL = "https://share.reclaimprotocol.org";
+const SERVER_URL = "https://whistleblower-backend-qq9t.onrender.com";
 var SubmissionStatus;
 (function (SubmissionStatus) {
     SubmissionStatus["pending"] = "pending";
@@ -68,7 +69,7 @@ app.post("/generate", (req, res) => __awaiter(void 0, void 0, void 0, function* 
         "/" +
         encodeURIComponent(JSON.stringify({
             sessionId,
-            callbackUrl: "http://192.168.0.182:8000/data/" + sessionId,
+            callbackUrl: SERVER_URL + "/data/" + sessionId,
         }));
     res.send({
         sessionId,
