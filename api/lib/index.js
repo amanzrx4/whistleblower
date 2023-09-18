@@ -16,10 +16,13 @@ const client_1 = require("@prisma/client");
 const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const express_1 = __importDefault(require("express"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const uuid_1 = require("uuid");
+const models_1 = __importDefault(require("./models"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT || 8000;
+const DATABASE_URL = process.env.DATABASE_URL;
 app.use(express_1.default.json());
 app.use((0, cors_1.default)());
 const RECLAIM_APP_URL = "https://share.reclaimprotocol.org";
@@ -33,11 +36,11 @@ process.on("uncaughtException", function (err) {
     console.log("UNCAUGHT EXCEPTION:\t", err);
 });
 app.get("/hello", (req, res) => {
-    res.send("Hello World");
+    res.status(200).send("Hello World");
 });
 app.get("/whistleblow", (_, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const query = yield prisma.submissions.findMany();
+        const query = yield models_1.default.find({});
         const filteredQuery = query.filter((i) => i.message && i.proof && i.proofHash && i.sessionId);
         res.status(200).send({
             data: filteredQuery,
@@ -178,6 +181,14 @@ app.get("/status/:sessionId", (req, res) => __awaiter(void 0, void 0, void 0, fu
         });
     }
 }));
-app.listen(port, () => {
-    console.log(`Server is running at http://192.168.68.104:${port}`);
+const start = () => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        yield mongoose_1.default.connect(DATABASE_URL);
+        app.listen(port, () => console.log("Server started on port", port));
+    }
+    catch (error) {
+        console.error(error);
+        process.exit(1);
+    }
 });
+start();

@@ -2,11 +2,14 @@ import { PrismaClient } from "@prisma/client";
 import cors from "cors";
 import dotenv from "dotenv";
 import express, { Express, Request, Response } from "express";
+import mongoose from "mongoose";
 import { v4 as randomId } from "uuid";
+import Submissions from "./models";
 
 dotenv.config();
 const app: Express = express();
 const port = process.env.PORT || 8000;
+const DATABASE_URL = process.env.DATABASE_URL as string;
 app.use(express.json());
 app.use(cors());
 
@@ -22,12 +25,12 @@ process.on("uncaughtException", function (err) {
 });
 
 app.get("/hello", (req, res) => {
-  res.send("Hello World");
+  res.status(200).send("Hello World");
 });
 
 app.get("/whistleblow", async (_: Request, res: Response) => {
   try {
-    const query = await prisma.submissions.findMany();
+    const query = await Submissions.find({});
 
     const filteredQuery = query.filter(
       (i) => i.message && i.proof && i.proofHash && i.sessionId
@@ -186,6 +189,14 @@ app.get("/status/:sessionId", async (req, res: Response) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server is running at http://192.168.68.104:${port}`);
-});
+const start = async () => {
+  try {
+    await mongoose.connect(DATABASE_URL);
+    app.listen(port, () => console.log("Server started on port", port));
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
+  }
+};
+
+start();
