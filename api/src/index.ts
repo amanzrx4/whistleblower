@@ -1,15 +1,14 @@
 import { PrismaClient } from "@prisma/client";
-import dotenv from "dotenv";
-import express, { Express, Response, Request } from "express";
-import { v4 as randomId } from "uuid";
-import { validateProofs } from "./utils";
 import cors from "cors";
+import dotenv from "dotenv";
+import express, { Express, Request, Response } from "express";
+import { v4 as randomId } from "uuid";
 
 dotenv.config();
 const app: Express = express();
 const port = process.env.PORT || 8000;
-app.use(cors());
 app.use(express.json());
+app.use(cors());
 
 const RECLAIM_APP_URL = "https://share.reclaimprotocol.org";
 const prisma = new PrismaClient();
@@ -22,11 +21,11 @@ process.on("uncaughtException", function (err) {
   console.log("UNCAUGHT EXCEPTION:\t", err);
 });
 
-app.get("/", (req, res) => {
+app.get("/hello", (req, res) => {
   res.send("Hello World");
 });
 
-app.get("/whistleblow", async (req: Request, res: Response) => {
+app.get("/whistleblow", async (_: Request, res: Response) => {
   try {
     const query = await prisma.submissions.findMany();
 
