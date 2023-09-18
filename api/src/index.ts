@@ -10,7 +10,6 @@ const app: Express = express();
 const port = process.env.PORT || 8000;
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 const RECLAIM_APP_URL = "https://share.reclaimprotocol.org";
 const prisma = new PrismaClient();
