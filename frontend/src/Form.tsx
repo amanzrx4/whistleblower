@@ -19,6 +19,7 @@ const Form = ({ sessionId }: Props) => {
           "Content-Type": "application/json",
         },
       });
+      window.location.href = "/";
     } catch (error) {
       console.log("error form submit", error);
     }
@@ -27,15 +28,16 @@ const Form = ({ sessionId }: Props) => {
   return (
     <form onSubmit={onSubmit}>
       <Group position="apart" mb={5}>
-        <Text component="label" htmlFor="your-password" size="sm" weight={500}>
-          Whistleblow something
+        <Text component="label" htmlFor="your-password" size="xl" weight={500}>
+          Whistleblow something &#129323;
         </Text>
       </Group>
       <Textarea
-        size="xl"
+        maxLength={1000}
+        size="lg"
         style={{ width: "100%" }}
         variant="filled"
-        minRows={5}
+        minRows={8}
         required
         value={input}
         onChange={(event) => setInput(event.currentTarget.value)}

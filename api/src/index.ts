@@ -69,7 +69,7 @@ app.post("/generate", async (req: Request, res: Response) => {
     encodeURIComponent(
       JSON.stringify({
         sessionId,
-        callbackUrl: "http://192.168.68.104:8000/data/" + sessionId,
+        callbackUrl: "http://192.168.0.182:8000/data/" + sessionId,
       })
     );
 

@@ -13,16 +13,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const client_1 = require("@prisma/client");
+const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const express_1 = __importDefault(require("express"));
 const uuid_1 = require("uuid");
-const cors_1 = __importDefault(require("cors"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT || 8000;
-app.use((0, cors_1.default)());
 app.use(express_1.default.json());
-app.use(express_1.default.urlencoded({ extended: true }));
+app.use((0, cors_1.default)());
 const RECLAIM_APP_URL = "https://share.reclaimprotocol.org";
 const prisma = new client_1.PrismaClient();
 var SubmissionStatus;
@@ -33,10 +32,10 @@ var SubmissionStatus;
 process.on("uncaughtException", function (err) {
     console.log("UNCAUGHT EXCEPTION:\t", err);
 });
-app.get("/", (req, res) => {
+app.get("/hello", (req, res) => {
     res.send("Hello World");
 });
-app.get("/whistleblow", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.get("/whistleblow", (_, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const query = yield prisma.submissions.findMany();
         const filteredQuery = query.filter((i) => i.message && i.proof && i.proofHash && i.sessionId);
@@ -46,6 +45,7 @@ app.get("/whistleblow", (req, res) => __awaiter(void 0, void 0, void 0, function
         });
     }
     catch (error) {
+        console.log("error", error);
         res.status(500).send({
             message: "Something went wrong",
         });
@@ -71,7 +71,7 @@ app.post("/generate", (req, res) => __awaiter(void 0, void 0, void 0, function* 
         "/" +
         encodeURIComponent(JSON.stringify({
             sessionId,
-            callbackUrl: "http://192.168.68.104:8000/data/" + sessionId,
+            callbackUrl: "http://192.168.0.182:8000/data/" + sessionId,
         }));
     res.send({
         sessionId,

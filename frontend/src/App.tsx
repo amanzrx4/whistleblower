@@ -1,23 +1,28 @@
 import { Button, Flex } from "@mantine/core";
+import { IconPlus } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
+import { Route, useLocation } from "wouter";
 import "./App.css";
-import { QRCodeSVG } from "qrcode.react";
-import Form from "./Form";
 import SubmissionCard from "./Card";
+import SessionPage from "./SessionPage";
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL as string;
-enum SubmissionStatus {
-  idle = "idle",
-  pending = "pending",
-  completed = "completed",
+
+export interface Data {
+  createdAt: string;
+  id: string;
+  message: string;
+  proof: string;
+  proofHash: string;
+  sessionId: string;
+  updatedAt: string;
 }
+
 function App() {
-  const [sessionId, setSessionId] = useState("");
-  const [templateUrl, setTemplateUrl] = useState("");
-  const [data, setData] = useState<{ message: string }[]>([]);
-  const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>(
-    SubmissionStatus.idle
-  );
+  // const [sessionId, setSessionId] = useState("");
+  // const [templateUrl, setTemplateUrl] = useState("");
+  const [data, setData] = useState<Data[]>([]);
+  const [, navigate] = useLocation();
 
   console.log("data", data);
 
@@ -33,6 +38,13 @@ function App() {
     });
   }, []);
 
+  // useEffect(()=>{
+
+  //   if(templateUrl === "") return;
+
+  //   navigate("/session/"+templateUrl);
+
+  // },[templateUrl])
   const onGenerate = async () => {
     const res = await fetch((BASE_URL + "/generate") as string, {
       method: "POST",
@@ -41,60 +53,62 @@ function App() {
       sessionId: string;
       templateUrl: string;
     };
-    setSessionId(data.sessionId);
-    setTemplateUrl(data.templateUrl);
+
+    const d = encodeURIComponent(JSON.stringify({ data: data.templateUrl }));
+
+    const navigateString = "session/" + data.sessionId + "/" + d;
+    navigate(navigateString);
   };
 
-  const onFetchSessionData = async (id: string) => {
-    // /data/:sessionId
-    const res = await fetch(BASE_URL + "/status/" + id);
-    const data = (await res.json()) as {
-      status: SubmissionStatus;
-      sessionId: string;
-    };
-    setSubmissionStatus(data.status);
-  };
+  // if (submissionStatus === SubmissionStatus.completed) {
+  //   return <Form sessionId={sessionId} />;
+  // }
 
-  useEffect(() => {
-    if (sessionId === "") return;
-
-    if (submissionStatus === SubmissionStatus.idle) {
-      onFetchSessionData(sessionId);
-      return;
-    }
-
-    if (submissionStatus === SubmissionStatus.completed) return;
-    setInterval(() => {
-      console.log("fetching", sessionId);
-      onFetchSessionData(sessionId);
-    }, 2000);
-  }, [sessionId, submissionStatus]);
-
-  if (submissionStatus === SubmissionStatus.completed) {
-    return <Form sessionId={sessionId} />;
-  }
+  // return (
+  //   <div
+  //     style={{
+  //       width: "100%",
+  //       height: "100%",
+  //     }}
+  //   >
+  //     <Header
+  //       links={[
+  //         {
+  //           link: "",
+  //           label: "Home",
+  //         },
+  //       ]}
+  //     />
+  //   </div>
+  // );
 
   return (
     <>
-      {sessionId !== "" ? (
-        <div>
-          <h3>Session ID: {sessionId}</h3>
-          <QRCodeSVG value={templateUrl || ""} />,
-          <h2>Status: {submissionStatus.toUpperCase()}</h2>
-        </div>
-      ) : (
+      <Route path="/session/:sessionId/:templateObj">
+        {({ sessionId, templateObj }) => (
+          // <div>something</div>
+          <SessionPage sessionId={sessionId!} templateObj={templateObj!} />
+        )}
+      </Route>
+      <Route path="/">
         <div style={{ width: "100%" }}>
-          <Button mb={"lg"} variant="outline" onClick={onGenerate}>
+          <Button
+            leftIcon={<IconPlus />}
+            variant="gradient"
+            gradient={{ from: "indigo", to: "cyan" }}
+            onClick={onGenerate}
+            mb={"lg"}
+          >
             Whistleblow
           </Button>
 
           <Flex gap={"lg"} direction={"column"}>
-            {data.map((item) => {
-              return <SubmissionCard message={item.message} />;
+            {data.map((data) => {
+              return <SubmissionCard key={data.id} {...data} />;
             })}
           </Flex>
         </div>
-      )}
+      </Route>
     </>
   );
 }
