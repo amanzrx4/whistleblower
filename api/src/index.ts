@@ -1,4 +1,3 @@
-import { PrismaClient } from "@prisma/client";
 import cors from "cors";
 import dotenv from "dotenv";
 import express, { Express, Request, Response } from "express";
@@ -14,7 +13,6 @@ app.use(express.json());
 app.use(cors());
 
 const RECLAIM_APP_URL = "https://share.reclaimprotocol.org";
-const prisma = new PrismaClient();
 
 enum SubmissionStatus {
   pending = "pending",
@@ -51,18 +49,14 @@ app.get("/whistleblow", async (_: Request, res: Response) => {
 app.post("/generate", async (req: Request, res: Response) => {
   const sessionId = randomId();
 
-  await prisma.submissions
-    .create({
-      data: {
-        sessionId,
-      },
-    })
-    .catch((e) => {
-      res.status(500).send({
-        message: "Something went wrong",
-      });
-      return;
+  await Submissions.create({
+    sessionId,
+  }).catch((e) => {
+    res.status(500).send({
+      message: "Something went wrong",
     });
+    return;
+  });
 
   const templateUrl =
     RECLAIM_APP_URL +
@@ -87,36 +81,25 @@ app.post("/data/:sessionId", async (req: Request, res: Response) => {
   let proofs = req.body.proofs;
   const type = req.query.type;
 
-  if (type === "message") {
-    const whistleBlowMessage = req.body.whistleBlowMessage;
-
-    console.log("whistleBlowMessage", whistleBlowMessage);
-    const submission = await prisma.submissions.findFirstOrThrow({
-      where: {
-        sessionId,
-      },
-    });
-
-    await prisma.submissions.update({
-      where: {
-        id: submission.id,
-      },
-      data: {
-        message: whistleBlowMessage,
-      },
-    });
-    res.status(200).send({
-      message: "submitted message",
-    });
-    return;
-  }
-
-  console.log("proofs", req.body);
   try {
+    if (type === "message") {
+      const whistleBlowMessage = req.body.whistleBlowMessage;
+
+      await Submissions.findOneAndUpdate(
+        { sessionId },
+        { message: whistleBlowMessage }
+      );
+
+      res.status(200).send({
+        message: "submitted message",
+      });
+      return;
+    }
+
+    console.log("proofs", req.body);
+
     // const isProofsValid = await validateProofs(proofs);
     const isProofsValid = true;
-
-    console.log("proofs valid", isProofsValid);
     if (!isProofsValid) {
       res.status(400).send({
         message: "Invalid proof",
@@ -124,36 +107,17 @@ app.post("/data/:sessionId", async (req: Request, res: Response) => {
       return;
     }
 
-    try {
-      const submission = await prisma.submissions.findFirstOrThrow({
-        where: {
-          sessionId,
-        },
-      });
-
-      await prisma.submissions.update({
-        where: {
-          id: submission.id,
-        },
-        data: {
-          proof: JSON.stringify(proofs),
-          proofHash: JSON.stringify(proofs),
-        },
-      });
-    } catch (error) {
-      console.log("error", error);
-      res.status(400).send({
-        message: "Invalid sessionId",
-      });
-      return;
-    }
+    await Submissions.findOneAndUpdate(
+      { sessionId },
+      { proof: JSON.stringify(proofs), proofHash: JSON.stringify(proofs) }
+    );
 
     res.status(200).send({
       sessionId,
       proofs,
       message: "proofs submitted",
     });
-  } catch (error) {
+  } catch {
     res.status(400).send({
       message: "Invalid proof",
     });
@@ -164,11 +128,17 @@ app.get("/status/:sessionId", async (req, res: Response) => {
   const sessionId = req.params.sessionId;
 
   try {
-    const submission = await prisma.submissions.findFirstOrThrow({
-      where: {
-        sessionId,
-      },
+    const submission = await Submissions.findOne({
+      sessionId,
     });
+
+    if (!submission) {
+      res.status(400).send({
+        message: "Invalid sessionId",
+      });
+      return;
+    }
+
     if (!submission.proof || !submission.proofHash) {
       res.status(200).send({
         sessionId,

@@ -12,7 +12,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const client_1 = require("@prisma/client");
 const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const express_1 = __importDefault(require("express"));
@@ -26,7 +25,6 @@ const DATABASE_URL = process.env.DATABASE_URL;
 app.use(express_1.default.json());
 app.use((0, cors_1.default)());
 const RECLAIM_APP_URL = "https://share.reclaimprotocol.org";
-const prisma = new client_1.PrismaClient();
 var SubmissionStatus;
 (function (SubmissionStatus) {
     SubmissionStatus["pending"] = "pending";
@@ -56,13 +54,9 @@ app.get("/whistleblow", (_, res) => __awaiter(void 0, void 0, void 0, function* 
 }));
 app.post("/generate", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const sessionId = (0, uuid_1.v4)();
-    yield prisma.submissions
-        .create({
-        data: {
-            sessionId,
-        },
-    })
-        .catch((e) => {
+    yield models_1.default.create({
+        sessionId,
+    }).catch((e) => {
         res.status(500).send({
             message: "Something went wrong",
         });
@@ -85,68 +79,32 @@ app.post("/data/:sessionId", (req, res) => __awaiter(void 0, void 0, void 0, fun
     const sessionId = req.params.sessionId;
     let proofs = req.body.proofs;
     const type = req.query.type;
-    if (type === "message") {
-        const whistleBlowMessage = req.body.whistleBlowMessage;
-        console.log("whistleBlowMessage", whistleBlowMessage);
-        const submission = yield prisma.submissions.findFirstOrThrow({
-            where: {
-                sessionId,
-            },
-        });
-        yield prisma.submissions.update({
-            where: {
-                id: submission.id,
-            },
-            data: {
-                message: whistleBlowMessage,
-            },
-        });
-        res.status(200).send({
-            message: "submitted message",
-        });
-        return;
-    }
-    console.log("proofs", req.body);
     try {
+        if (type === "message") {
+            const whistleBlowMessage = req.body.whistleBlowMessage;
+            yield models_1.default.findOneAndUpdate({ sessionId }, { message: whistleBlowMessage });
+            res.status(200).send({
+                message: "submitted message",
+            });
+            return;
+        }
+        console.log("proofs", req.body);
         // const isProofsValid = await validateProofs(proofs);
         const isProofsValid = true;
-        console.log("proofs valid", isProofsValid);
         if (!isProofsValid) {
             res.status(400).send({
                 message: "Invalid proof",
             });
             return;
         }
-        try {
-            const submission = yield prisma.submissions.findFirstOrThrow({
-                where: {
-                    sessionId,
-                },
-            });
-            yield prisma.submissions.update({
-                where: {
-                    id: submission.id,
-                },
-                data: {
-                    proof: JSON.stringify(proofs),
-                    proofHash: JSON.stringify(proofs),
-                },
-            });
-        }
-        catch (error) {
-            console.log("error", error);
-            res.status(400).send({
-                message: "Invalid sessionId",
-            });
-            return;
-        }
+        yield models_1.default.findOneAndUpdate({ sessionId }, { proof: JSON.stringify(proofs), proofHash: JSON.stringify(proofs) });
         res.status(200).send({
             sessionId,
             proofs,
             message: "proofs submitted",
         });
     }
-    catch (error) {
+    catch (_a) {
         res.status(400).send({
             message: "Invalid proof",
         });
@@ -155,11 +113,15 @@ app.post("/data/:sessionId", (req, res) => __awaiter(void 0, void 0, void 0, fun
 app.get("/status/:sessionId", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const sessionId = req.params.sessionId;
     try {
-        const submission = yield prisma.submissions.findFirstOrThrow({
-            where: {
-                sessionId,
-            },
+        const submission = yield models_1.default.findOne({
+            sessionId,
         });
+        if (!submission) {
+            res.status(400).send({
+                message: "Invalid sessionId",
+            });
+            return;
+        }
         if (!submission.proof || !submission.proofHash) {
             res.status(200).send({
                 sessionId,
