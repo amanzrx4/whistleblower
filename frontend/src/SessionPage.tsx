@@ -1,4 +1,4 @@
-import { Button, Center, Flex, Loader, Text } from "@mantine/core";
+import { Button, Flex, Loader, Text } from "@mantine/core";
 import { QRCodeSVG } from "qrcode.react";
 // import { SubmissionStatus } from "./App";
 import { useEffect, useState } from "react";
@@ -70,7 +70,9 @@ const SessionPage = ({ sessionId, templateObj }: Props) => {
     >
       <QRCodeSVG value={templateUrl || ""} />
 
-      <Button   size="xs" variant="default">Copy</Button>
+      <Button size="xs" variant="default">
+        Copy
+      </Button>
       <Text
         variant="gradient"
         gradient={{ from: "indigo", to: "cyan", deg: 45 }}
