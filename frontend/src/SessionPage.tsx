@@ -66,7 +66,13 @@ const SessionPage = ({ sessionId, templateObj }: Props) => {
     >
       <QRCodeSVG value={templateUrl || ""} />
 
-      <Button size="xs" variant="default">
+      <Button
+        size="xs"
+        variant="default"
+        onClick={() => {
+          navigator.clipboard.writeText(templateUrl);
+        }}
+      >
         Copy
       </Button>
       <Text
