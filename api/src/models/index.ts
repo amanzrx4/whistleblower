@@ -2,7 +2,6 @@ import mongoose, { Document, Schema } from "mongoose";
 
 export interface SubmissionDocument extends Document {
   sessionId: string;
-  proofHash?: string;
   proof?: string;
   message?: string;
 }
@@ -10,7 +9,6 @@ export interface SubmissionDocument extends Document {
 const submissionsSchema = new Schema<SubmissionDocument>(
   {
     sessionId: { type: String, unique: true, required: true },
-    proofHash: String,
     proof: String,
     message: String,
   },

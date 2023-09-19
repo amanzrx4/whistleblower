@@ -1,4 +1,3 @@
-// import { Button, Card, Image, Text } from "@mantine/core";
 import {
   ActionIcon,
   Card,
@@ -8,10 +7,17 @@ import {
   createStyles,
   rem,
 } from "@mantine/core";
-import { IconBookmark, IconHeart, IconShare } from "@tabler/icons-react";
+import {
+  IconBookmark,
+  IconHeart,
+  IconShare,
+  IconDiscountCheckFilled as IconDiscountCheck,
+} from "@tabler/icons-react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { Data } from "./App";
+
+const RECLAIM_PROCOTOL_WEBSITE = "https://www.reclaimprotocol.org/";
 
 dayjs.extend(relativeTime);
 interface Props extends Data {}
@@ -81,14 +87,36 @@ const SubmissionCard = ({ message, createdAt }: Props) => {
         </Badge>
       </Group> */}
 
-      <Text style={{ textAlign: "start" }} size="sm" color="dark">
-        {message}
-      </Text>
+      <Group position="apart">
+        <Text style={{ textAlign: "start" }} size="sm" color="dark">
+          {message}
+        </Text>
+
+        <Group spacing={4}>
+          <IconDiscountCheck
+            size="1rem"
+            style={{
+              color: theme.colors.blue[6],
+            }}
+          />
+          <Text
+            style={{ textAlign: "start", cursor: "pointer" }}
+            size="sm"
+            underline
+            color="blue"
+            onClick={() => {
+              window.open(RECLAIM_PROCOTOL_WEBSITE, "_blank");
+            }}
+          >
+            Verified
+          </Text>
+        </Group>
+      </Group>
 
       <Group position="apart" className={classes.footer}>
         <Center>
           <Text fz="sm" inline color="dimmed">
-            {"-"} {showTime}
+            {"~"} {showTime}
           </Text>
         </Center>
 

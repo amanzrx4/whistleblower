@@ -17,19 +17,15 @@ export const validateProofs = async (obj: unknown) => {
       ? (obj as SubmittedProof[])
       : null;
 
-    console.log("proof obj", proofsObj);
-
     if (proofsObj) {
       let isValid = false;
 
       // @ts-ignore
       isValid = await verifyCorrectnessOfProofs("", proofsObj);
-      console.log("is valid", isValid);
 
       return isValid;
     }
   } catch (error) {
-    console.log("error", error);
     isValid = false;
   }
   return isValid;

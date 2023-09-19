@@ -4,6 +4,7 @@ import express, { Express, Request, Response } from "express";
 import mongoose from "mongoose";
 import { v4 as randomId } from "uuid";
 import Submissions from "./models";
+import { validateProofs } from "./utils";
 
 dotenv.config();
 const app: Express = express();
@@ -13,7 +14,7 @@ app.use(express.json());
 app.use(cors());
 
 const RECLAIM_APP_URL = "https://share.reclaimprotocol.org";
-const SERVER_URL = "https://whistleblower-backend-qq9t.onrender.com"
+const SERVER_URL = "https://whistleblower-backend-qq9t.onrender.com";
 
 enum SubmissionStatus {
   pending = "pending",
@@ -23,16 +24,16 @@ process.on("uncaughtException", function (err) {
   console.log("UNCAUGHT EXCEPTION:\t", err);
 });
 
-app.get("/hello", (req, res) => {
+app.get("/hello", (_, res: Response) => {
   res.status(200).send("Hello World");
 });
 
 app.get("/whistleblow", async (_: Request, res: Response) => {
   try {
-    const query = await Submissions.find({});
+    const query = await Submissions.find({}).sort("-createdAt");
 
     const filteredQuery = query.filter(
-      (i) => i.message && i.proof && i.proofHash && i.sessionId
+      (i) => i.message && i.proof && i.sessionId
     );
 
     res.status(200).send({
@@ -40,7 +41,6 @@ app.get("/whistleblow", async (_: Request, res: Response) => {
       message: "success",
     });
   } catch (error) {
-    console.log("error", error);
     res.status(500).send({
       message: "Something went wrong",
     });
@@ -52,6 +52,7 @@ app.post("/generate", async (req: Request, res: Response) => {
 
   await Submissions.create({
     sessionId,
+    proof: null,
   }).catch((e) => {
     res.status(500).send({
       message: "Something went wrong",
@@ -77,6 +78,16 @@ app.post("/generate", async (req: Request, res: Response) => {
   });
 });
 
+app.post("/proofTest", async (req: Request, res: Response) => {
+  const proofs = req.body.proofs;
+
+  const isProofsValid = await validateProofs(proofs);
+
+  res.status(200).send({
+    isProofsValid,
+  });
+});
+
 app.post("/data/:sessionId", async (req: Request, res: Response) => {
   const sessionId = req.params.sessionId;
   let proofs = req.body.proofs;
@@ -87,9 +98,15 @@ app.post("/data/:sessionId", async (req: Request, res: Response) => {
       const whistleBlowMessage = req.body.whistleBlowMessage;
 
       await Submissions.findOneAndUpdate(
-        { sessionId },
+        {
+          sessionId,
+        },
         { message: whistleBlowMessage }
-      );
+      )
+        .where("message")
+        .equals(null)
+        .where("proof")
+        .equals(null);
 
       res.status(200).send({
         message: "submitted message",
@@ -97,10 +114,8 @@ app.post("/data/:sessionId", async (req: Request, res: Response) => {
       return;
     }
 
-    console.log("proofs", req.body);
+    const isProofsValid = await validateProofs(proofs);
 
-    // const isProofsValid = await validateProofs(proofs);
-    const isProofsValid = true;
     if (!isProofsValid) {
       res.status(400).send({
         message: "Invalid proof",
@@ -110,8 +125,12 @@ app.post("/data/:sessionId", async (req: Request, res: Response) => {
 
     await Submissions.findOneAndUpdate(
       { sessionId },
-      { proof: JSON.stringify(proofs), proofHash: JSON.stringify(proofs) }
-    );
+      { proof: JSON.stringify(proofs) }
+    )
+      .where("message")
+      .equals(null)
+      .where("proof")
+      .equals(null);
 
     res.status(200).send({
       sessionId,
@@ -140,7 +159,7 @@ app.get("/status/:sessionId", async (req, res: Response) => {
       return;
     }
 
-    if (!submission.proof || !submission.proofHash) {
+    if (!submission.proof) {
       res.status(200).send({
         sessionId,
         status: SubmissionStatus.pending,

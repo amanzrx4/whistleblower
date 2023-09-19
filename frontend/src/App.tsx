@@ -10,7 +10,7 @@ const BASE_URL = import.meta.env.VITE_BACKEND_URL as string;
 
 export interface Data {
   createdAt: string;
-  id: string;
+  _id: string;
   message: string;
   proof: string;
   proofHash: string;
@@ -19,12 +19,8 @@ export interface Data {
 }
 
 function App() {
-  // const [sessionId, setSessionId] = useState("");
-  // const [templateUrl, setTemplateUrl] = useState("");
   const [data, setData] = useState<Data[]>([]);
   const [, navigate] = useLocation();
-
-  console.log("data", data);
 
   const fetchAllSubmissions = async () => {
     return await fetch(BASE_URL + "/whistleblow");
@@ -38,13 +34,6 @@ function App() {
     });
   }, []);
 
-  // useEffect(()=>{
-
-  //   if(templateUrl === "") return;
-
-  //   navigate("/session/"+templateUrl);
-
-  // },[templateUrl])
   const onGenerate = async () => {
     const res = await fetch((BASE_URL + "/generate") as string, {
       method: "POST",
@@ -86,7 +75,6 @@ function App() {
     <>
       <Route path="/session/:sessionId/:templateObj">
         {({ sessionId, templateObj }) => (
-          // <div>something</div>
           <SessionPage sessionId={sessionId!} templateObj={templateObj!} />
         )}
       </Route>
@@ -103,9 +91,9 @@ function App() {
           </Button>
 
           <Flex gap={"lg"} direction={"column"}>
-            {data.map((data) => {
-              return <SubmissionCard key={data.id} {...data} />;
-            })}
+            {data.map((data) => (
+              <SubmissionCard key={data._id} {...data} />
+            ))}
           </Flex>
         </div>
       </Route>

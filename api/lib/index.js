@@ -18,6 +18,7 @@ const express_1 = __importDefault(require("express"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const uuid_1 = require("uuid");
 const models_1 = __importDefault(require("./models"));
+const utils_1 = require("./utils");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT || 8000;
@@ -34,20 +35,19 @@ var SubmissionStatus;
 process.on("uncaughtException", function (err) {
     console.log("UNCAUGHT EXCEPTION:\t", err);
 });
-app.get("/hello", (req, res) => {
+app.get("/hello", (_, res) => {
     res.status(200).send("Hello World");
 });
 app.get("/whistleblow", (_, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const query = yield models_1.default.find({});
-        const filteredQuery = query.filter((i) => i.message && i.proof && i.proofHash && i.sessionId);
+        const query = yield models_1.default.find({}).sort("-createdAt");
+        const filteredQuery = query.filter((i) => i.message && i.proof && i.sessionId);
         res.status(200).send({
             data: filteredQuery,
             message: "success",
         });
     }
     catch (error) {
-        console.log("error", error);
         res.status(500).send({
             message: "Something went wrong",
         });
@@ -57,6 +57,7 @@ app.post("/generate", (req, res) => __awaiter(void 0, void 0, void 0, function* 
     const sessionId = (0, uuid_1.v4)();
     yield models_1.default.create({
         sessionId,
+        proof: null,
     }).catch((e) => {
         res.status(500).send({
             message: "Something went wrong",
@@ -76,6 +77,13 @@ app.post("/generate", (req, res) => __awaiter(void 0, void 0, void 0, function* 
         templateUrl,
     });
 }));
+app.post("/proofTest", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const proofs = req.body.proofs;
+    const isProofsValid = yield (0, utils_1.validateProofs)(proofs);
+    res.status(200).send({
+        isProofsValid,
+    });
+}));
 app.post("/data/:sessionId", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const sessionId = req.params.sessionId;
     let proofs = req.body.proofs;
@@ -83,22 +91,30 @@ app.post("/data/:sessionId", (req, res) => __awaiter(void 0, void 0, void 0, fun
     try {
         if (type === "message") {
             const whistleBlowMessage = req.body.whistleBlowMessage;
-            yield models_1.default.findOneAndUpdate({ sessionId }, { message: whistleBlowMessage });
+            yield models_1.default.findOneAndUpdate({
+                sessionId,
+            }, { message: whistleBlowMessage })
+                .where("message")
+                .equals(null)
+                .where("proof")
+                .equals(null);
             res.status(200).send({
                 message: "submitted message",
             });
             return;
         }
-        console.log("proofs", req.body);
-        // const isProofsValid = await validateProofs(proofs);
-        const isProofsValid = true;
+        const isProofsValid = yield (0, utils_1.validateProofs)(proofs);
         if (!isProofsValid) {
             res.status(400).send({
                 message: "Invalid proof",
             });
             return;
         }
-        yield models_1.default.findOneAndUpdate({ sessionId }, { proof: JSON.stringify(proofs), proofHash: JSON.stringify(proofs) });
+        yield models_1.default.findOneAndUpdate({ sessionId }, { proof: JSON.stringify(proofs) })
+            .where("message")
+            .equals(null)
+            .where("proof")
+            .equals(null);
         res.status(200).send({
             sessionId,
             proofs,
@@ -123,7 +139,7 @@ app.get("/status/:sessionId", (req, res) => __awaiter(void 0, void 0, void 0, fu
             });
             return;
         }
-        if (!submission.proof || !submission.proofHash) {
+        if (!submission.proof) {
             res.status(200).send({
                 sessionId,
                 status: SubmissionStatus.pending,

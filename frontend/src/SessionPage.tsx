@@ -28,7 +28,6 @@ const SessionPage = ({ sessionId, templateObj }: Props) => {
   ).data;
 
   const onFetchSessionData = async (id: string) => {
-    // /data/:sessionId
     const res = await fetch(BASE_URL + "/status/" + id);
     const data = (await res.json()) as {
       status: SubmissionStatus;
@@ -36,8 +35,6 @@ const SessionPage = ({ sessionId, templateObj }: Props) => {
     };
     setSubmissionStatus(data.status);
   };
-
-  console.log("submissionStatus", submissionStatus);
 
   useEffect(() => {
     if (sessionId === "") return;
@@ -49,7 +46,6 @@ const SessionPage = ({ sessionId, templateObj }: Props) => {
 
     if (submissionStatus === SubmissionStatus.completed) return;
     setInterval(() => {
-      console.log("fetching", sessionId);
       onFetchSessionData(sessionId);
     }, 2000);
   }, [sessionId, submissionStatus]);
