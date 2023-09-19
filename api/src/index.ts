@@ -106,7 +106,7 @@ app.post("/data/:sessionId", async (req: Request, res: Response) => {
         .where("message")
         .equals(null)
         .where("proof")
-        .equals(null);
+        .ne(null);
 
       res.status(200).send({
         message: "submitted message",
