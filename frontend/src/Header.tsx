@@ -49,6 +49,7 @@ const Header = () => {
         style={{
           cursor: "pointer",
           color: "black",
+          textDecoration: "underline",
         }}
         className={classes.link}
         onClick={(e) => {
