@@ -44,7 +44,6 @@ export const validateWhistleBlowMessage = (message: unknown) => {
     return false;
   }
 
-  // regex for string of max length 500
   const regex = /^.{1,1000}$/;
 
   if (!regex.test(message)) {
