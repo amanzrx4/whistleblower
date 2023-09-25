@@ -22,8 +22,8 @@ const RECLAIM_PROCOTOL_WEBSITE = "https://www.reclaimprotocol.org/";
 dayjs.extend(relativeTime);
 interface Props extends Data {}
 
-const SubmissionCard = ({ message, createdAt }: Props) => {
-  const showTime = dayjs(createdAt).fromNow();
+const SubmissionCard = ({ message, updatedAt }: Props) => {
+  const showTime = dayjs(updatedAt).fromNow();
 
   const useStyles = createStyles((theme) => ({
     card: {
