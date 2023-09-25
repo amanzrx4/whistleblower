@@ -4,7 +4,7 @@ import express, { Express, Request, Response } from "express";
 import mongoose from "mongoose";
 import { v4 as randomId } from "uuid";
 import Submissions from "./models";
-import { validateProofs } from "./utils";
+import { validateProofs, validateWhistleBlowMessage } from "./utils";
 
 dotenv.config();
 const app: Express = express();
@@ -96,6 +96,15 @@ app.post("/data/:sessionId", async (req: Request, res: Response) => {
   try {
     if (type === "message") {
       const whistleBlowMessage = req.body.whistleBlowMessage;
+
+      const isValid = validateWhistleBlowMessage(whistleBlowMessage);
+
+      if (!isValid) {
+        res.status(400).send({
+          message: "Invalid message",
+        });
+        return;
+      }
 
       await Submissions.findOneAndUpdate(
         {

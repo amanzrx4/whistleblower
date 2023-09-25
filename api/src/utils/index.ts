@@ -38,3 +38,18 @@ const isProofObject = (obj: unknown): obj is Proof[] => {
 
   return true;
 };
+
+export const validateWhistleBlowMessage = (message: unknown) => {
+  if (typeof message !== "string") {
+    return false;
+  }
+
+  message = message.trim();
+  // regex for string of max length 500
+  const regex = /^.{1,1000}$/;
+
+  if (!regex.test(message)) {
+    return false;
+  }
+  return true;
+};
