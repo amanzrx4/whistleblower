@@ -88,7 +88,7 @@ const Header = () => {
                 window.location.href = "https://www.reclaimprotocol.org/";
               }}
               weight="bolder"
-              color="black"
+              color="dimmed"
             >
               Powered by reclaim
             </Text>
