@@ -40,11 +40,10 @@ const isProofObject = (obj: unknown): obj is Proof[] => {
 };
 
 export const validateWhistleBlowMessage = (message: unknown) => {
-  if (typeof message !== "string") {
+  if (typeof message !== "string" || message.trim().length === 0) {
     return false;
   }
 
-  message = message.trim();
   // regex for string of max length 500
   const regex = /^.{1,1000}$/;
 
