@@ -1,151 +1,98 @@
-import { useState } from "react";
-import {
-  createStyles,
-  Header as MantineHeader,
-  Group,
-  ActionIcon,
-  Container,
-  Burger,
-  rem,
-} from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
-import {
-  IconBrandTwitter,
-  IconBrandYoutube,
-  IconBrandInstagram,
-} from "@tabler/icons-react";
-import ReclaimLogo from "../assets/android.svg";
+import { Center, Container, Flex, Group, Menu, Text } from "@mantine/core";
+import { IconChevronDown } from "@tabler/icons-react";
+import ReclaimLogo from "../assets/reclaim.svg";
+import classes from "./header.module.css";
 
-const useStyles = createStyles((theme) => ({
-  inner: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    height: rem(56),
+const links = [
+  { link: "/", label: "Home" },
+  { link: "https://docs.reclaimprotocol.org/", label: "Docs" },
+  { link: "https://www.reclaimprotocol.org/", label: "Learn" },
+];
 
-    [theme.fn.smallerThan("sm")]: {
-      justifyContent: "flex-start",
-    },
-  },
+const Header = () => {
+  // const [opened, { toggle }] = useDisclosure(false);
 
-  links: {
-    width: rem(260),
+  const items = links.map((link) => {
+    const menuItems = link.links?.map((item) => (
+      <Menu.Item key={item.link}>{item.label}</Menu.Item>
+    ));
 
-    [theme.fn.smallerThan("sm")]: {
-      display: "none",
-    },
-  },
-
-  social: {
-    width: rem(260),
-
-    [theme.fn.smallerThan("sm")]: {
-      width: "auto",
-      marginLeft: "auto",
-    },
-  },
-
-  burger: {
-    marginRight: theme.spacing.md,
-
-    [theme.fn.largerThan("sm")]: {
-      display: "none",
-    },
-  },
-
-  link: {
-    display: "block",
-    lineHeight: 1,
-    padding: `${rem(8)} ${rem(12)}`,
-    borderRadius: theme.radius.sm,
-    textDecoration: "none",
-    color:
-      theme.colorScheme === "dark"
-        ? theme.colors.dark[0]
-        : theme.colors.gray[7],
-    fontSize: theme.fontSizes.sm,
-    fontWeight: 500,
-
-    "&:hover": {
-      backgroundColor:
-        theme.colorScheme === "dark"
-          ? theme.colors.dark[6]
-          : theme.colors.gray[0],
-    },
-  },
-
-  linkActive: {
-    "&, &:hover": {
-      backgroundColor: theme.fn.variant({
-        variant: "light",
-        color: theme.primaryColor,
-      }).background,
-      color: theme.fn.variant({ variant: "light", color: theme.primaryColor })
-        .color,
-    },
-  },
-}));
-
-interface HeaderMiddleProps {
-  links: { link: string; label: string }[];
-}
-
-const Header = ({ links }: HeaderMiddleProps) => {
-  const [opened, { toggle }] = useDisclosure(false);
-  const [active, setActive] = useState(links[0].link);
-  const { classes, cx } = useStyles();
-
-  const items = links.map((link) => (
-    <a
-      key={link.label}
-      href={link.link}
-      className={cx(classes.link, {
-        [classes.linkActive]: active === link.link,
-      })}
-      onClick={(event) => {
-        event.preventDefault();
-        setActive(link.link);
-      }}
-    >
-      {link.label}
-    </a>
-  ));
+    if (menuItems) {
+      return (
+        <Menu
+          key={link.label}
+          trigger="hover"
+          transitionProps={{ exitDuration: 0 }}
+          withinPortal
+        >
+          <Menu.Target>
+            <a
+              href={link.link}
+              className={classes.link}
+              onClick={(event) => event.preventDefault()}
+            >
+              <Center>
+                <span className={classes.linkLabel}>{link.label}</span>
+                <IconChevronDown size="0.9rem" stroke={1.5} />
+              </Center>
+            </a>
+          </Menu.Target>
+          <Menu.Dropdown>{menuItems}</Menu.Dropdown>
+        </Menu>
+      );
+    }
+    return (
+      <a
+        key={link.label}
+        style={{
+          cursor: "pointer",
+          color: "black",
+        }}
+        className={classes.link}
+        onClick={(e) => {
+          e.preventDefault();
+          if (link.link === "/") {
+            console.log("here", window.location.pathname);
+            if (window.location.pathname === "/") {
+              return window.scrollTo(0, 0);
+            }
+            return (window.location.href = "/");
+          }
+          return window.open(link.link, "_blank");
+        }}
+      >
+        {link.label}
+      </a>
+    );
+  });
 
   return (
-    <MantineHeader height={56} mb={120}>
-      <Container className={classes.inner}>
-        <Burger
-          opened={opened}
-          onClick={toggle}
-          size="sm"
-          className={classes.burger}
-        />
-        <Group className={classes.links} spacing={5}>
-          {items}
-        </Group>
-
-        <div
-          style={{
-            width: "100px",
-            height: "100px",
-          }}
-        >
-          <ReclaimLogo />
+    <header className={classes.header}>
+      <Container size="md">
+        <div className={classes.inner}>
+          <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+            <ReclaimLogo
+              style={{
+                borderRadius: "50%",
+              }}
+            />
+            <Text
+              style={{
+                cursor: "pointer",
+              }}
+              onClick={() => {
+                window.location.href = "https://www.reclaimprotocol.org/";
+              }}
+              weight="bolder"
+              color="black"
+            >
+              Powered by reclaim
+            </Text>
+          </div>
+          <Group>{items}</Group>
         </div>
-
-        <Group spacing={0} className={classes.social} position="right" noWrap>
-          <ActionIcon size="lg">
-            <IconBrandTwitter size="1.1rem" stroke={1.5} />
-          </ActionIcon>
-          <ActionIcon size="lg">
-            <IconBrandYoutube size="1.1rem" stroke={1.5} />
-          </ActionIcon>
-          <ActionIcon size="lg">
-            <IconBrandInstagram size="1.1rem" stroke={1.5} />
-          </ActionIcon>
-        </Group>
       </Container>
-    </MantineHeader>
+    </header>
   );
 };
 

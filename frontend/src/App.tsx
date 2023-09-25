@@ -5,6 +5,7 @@ import { Route, useLocation } from "wouter";
 import "./App.css";
 import SubmissionCard from "./Card";
 import SessionPage from "./SessionPage";
+import Header from "./Header";
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL as string;
 
@@ -53,26 +54,13 @@ function App() {
   //   return <Form sessionId={sessionId} />;
   // }
 
-  // return (
-  //   <div
-  //     style={{
-  //       width: "100%",
-  //       height: "100%",
-  //     }}
-  //   >
-  //     <Header
-  //       links={[
-  //         {
-  //           link: "",
-  //           label: "Home",
-  //         },
-  //       ]}
-  //     />
-  //   </div>
-  // );
+  // return <Header />;
 
   return (
     <>
+      <Route path="/">
+        <Header />
+      </Route>
       <Route path="/session/:sessionId/:templateObj">
         {({ sessionId, templateObj }) => (
           <SessionPage sessionId={sessionId!} templateObj={templateObj!} />
