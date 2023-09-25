@@ -1,4 +1,4 @@
-import { Center, Container, Flex, Group, Menu, Text } from "@mantine/core";
+import { Center, Container, Group, Menu, Text } from "@mantine/core";
 import { IconChevronDown } from "@tabler/icons-react";
 import ReclaimLogo from "../assets/reclaim.svg";
 import classes from "./header.module.css";
@@ -13,6 +13,8 @@ const Header = () => {
   // const [opened, { toggle }] = useDisclosure(false);
 
   const items = links.map((link) => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     const menuItems = link.links?.map((item) => (
       <Menu.Item key={item.link}>{item.label}</Menu.Item>
     ));
@@ -72,6 +74,8 @@ const Header = () => {
         <div className={classes.inner}>
           <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
             <ReclaimLogo
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
               style={{
                 borderRadius: "50%",
               }}
