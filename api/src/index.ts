@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import { v4 as randomId } from "uuid";
 import Submissions from "./models";
 import { validateProofs, validateWhistleBlowMessage } from "./utils";
+import Filter from "bad-words";
 
 dotenv.config();
 const app: Express = express();
@@ -78,16 +79,6 @@ app.post("/generate", async (req: Request, res: Response) => {
   });
 });
 
-app.post("/proofTest", async (req: Request, res: Response) => {
-  const proofs = req.body.proofs;
-
-  const isProofsValid = await validateProofs(proofs);
-
-  res.status(200).send({
-    isProofsValid,
-  });
-});
-
 app.post("/data/:sessionId", async (req: Request, res: Response) => {
   const sessionId = req.params.sessionId;
   let proofs = req.body.proofs;
@@ -95,7 +86,17 @@ app.post("/data/:sessionId", async (req: Request, res: Response) => {
 
   try {
     if (type === "message") {
-      const whistleBlowMessage = req.body.whistleBlowMessage;
+      const filter = new Filter();
+      let whistleBlowMessage = req.body.whistleBlowMessage;
+
+      if (!whistleBlowMessage || typeof whistleBlowMessage !== "string") {
+        res.status(400).send({
+          message: "Invalid message",
+        });
+        return;
+      }
+
+      whistleBlowMessage = filter.clean(whistleBlowMessage) as string;
 
       const isValid = validateWhistleBlowMessage(whistleBlowMessage);
 
