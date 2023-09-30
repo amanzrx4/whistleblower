@@ -1,6 +1,5 @@
 import { Button, Flex, Loader, Text } from "@mantine/core";
 import { QRCodeSVG } from "qrcode.react";
-// import { SubmissionStatus } from "./App";
 import { useEffect, useState } from "react";
 import Form from "./Form";
 
@@ -74,6 +73,15 @@ const SessionPage = ({ sessionId, templateObj }: Props) => {
         }}
       >
         Copy
+      </Button>
+      <Button
+        size="xs"
+        variant="default"
+        onClick={() => {
+          window.open(templateUrl, "_blank");
+        }}
+      >
+        Open
       </Button>
       <Text
         variant="gradient"
