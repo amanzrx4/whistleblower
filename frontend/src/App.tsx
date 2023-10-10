@@ -19,6 +19,18 @@ export interface Data {
   updatedAt: string;
 }
 
+export interface ProofObj {
+  provider: string;
+  ownerPublicKey: string;
+  timestampS: string;
+  witnessAddresses: string[];
+  signatures: string[];
+  redactedParameters: string;
+  identifier: string;
+  epoch: number;
+  context: string;
+}
+
 function App() {
   const [data, setData] = useState<Data[]>([]);
   const [, navigate] = useLocation();
@@ -49,12 +61,7 @@ function App() {
     const navigateString = "session/" + data.sessionId + "/" + d;
     navigate(navigateString);
   };
-
-  // if (submissionStatus === SubmissionStatus.completed) {
-  //   return <Form sessionId={sessionId} />;
-  // }
-
-  // return <Header />;
+  console.log(data);
 
   return (
     <>
